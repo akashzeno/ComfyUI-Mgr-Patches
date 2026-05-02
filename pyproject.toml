@@ -9,7 +9,7 @@ authors = [{ name = "akashzeno" }]
 keywords = ["comfyui", "comfyui-manager", "patch"]
 
 [project.urls]
-Repository = "https://github.com/akashzeno/ComfyUI-Manager-Patches"
+Repository = "https://github.com/akashzeno/ComfyUI-Mgr-Patches"
 
 [tool.comfy]
 PublisherId = "akashzeno"

@@ -1,4 +1,4 @@
-# ComfyUI-Manager Patches
+# ComfyUI-Mgr-Patches
 
 Local-only ComfyUI custom node that applies workarounds for bugs in the
 upstream `comfyui-manager` pip package. Enable the manager backend with
@@ -15,6 +15,14 @@ so when upstream fixes one of them the matching patch deactivates itself
 without affecting the others.
 
 Drop the folder into `custom_nodes/` and forget about it.
+
+> **Folder name note:** keep the folder name as `ComfyUI-Mgr-Patches`
+> (or anything else that does **not** contain the substring
+> `comfyui-manager` case-insensitively). Upstream
+> `comfyui-manager.should_be_disabled` blocks any custom-node folder
+> whose name matches that substring as a heuristic against legacy
+> manager installs — and a blocked folder's `prestartup_script.py`
+> never runs, which means the patches never apply.
 
 ## Patches
 
@@ -113,7 +121,7 @@ Document the patch in this README under a new `### <Name>` heading.
 ## Layout
 
 ```
-ComfyUI-Manager-Patches/
+ComfyUI-Mgr-Patches/
 ├── __init__.py              # Declares WEB_DIRECTORY, registers no nodes.
 ├── prestartup_script.py     # All Python-side patches, each version-gated.
 ├── pyproject.toml           # Standard ComfyUI custom-node metadata.
