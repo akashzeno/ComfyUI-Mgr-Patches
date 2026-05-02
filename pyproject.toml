@@ -1,0 +1,18 @@
+[project]
+name = "comfyui-manager-patches"
+version = "0.1.0"
+description = "Local-only patches for upstream comfyui-manager bugs."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "akashzeno" }]
+keywords = ["comfyui", "comfyui-manager", "patch"]
+
+[project.urls]
+Repository = "https://github.com/akashzeno/ComfyUI-Manager-Patches"
+
+[tool.comfy]
+PublisherId = "akashzeno"
+DisplayName = "ComfyUI-Manager Patches"
+Icon = ""
+includes = []
