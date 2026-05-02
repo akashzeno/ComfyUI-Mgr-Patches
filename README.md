@@ -1,8 +1,12 @@
 # ComfyUI-Manager Patches
 
 Local-only ComfyUI custom node that applies workarounds for bugs in the
-upstream `comfyui-manager` pip package (the one enabled by
-`--enable-manager`).
+upstream `comfyui-manager` pip package. Enable the manager backend with
+`--enable-manager`; if a patch targets the legacy manager UI (the older
+`ComfyUI Manager V<x.y.z>` dialog with the **Update All** /
+**Update ComfyUI** / **Switch ComfyUI** buttons), you also need
+`--enable-manager-legacy-ui`. The Update All fix below is one such
+legacy-UI patch.
 
 This node ships **no graph nodes**. It is a patch pack: each patch has a
 Python prestartup half (in `prestartup_script.py`) and/or a frontend
