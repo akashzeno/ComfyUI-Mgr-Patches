@@ -69,6 +69,36 @@ never finishes anyway). Together they are why Update All looks broken.
   coexists with a future upstream fix or any in-place patch without
   double-rendering.
 
+### Manager dialog button styling (`comfyui-frontend-package==1.42.15` + PrimeVue v4 unstyled mode)
+
+The legacy manager dialog constructs buttons as
+`<button class="p-button p-component cm-button">`, expecting PrimeVue's
+`.p-button` rules to provide `border-radius`, `padding`, and
+`min-height`. In ComfyUI frontend 1.42.15, PrimeVue v4 ships in
+**unstyled-by-default** mode — `.p-button` styles are only applied to
+Vue-rendered components carrying `data-pc-section` attributes, not to
+manually-constructed `<button class="p-button">` elements. The
+manager's own `.cm-button` rule sets colors only (background,
+border-color, color), so the buttons fall back to user-agent defaults
+(21px height, 1px×6px padding, 2px outset border, no rounded corners).
+
+Empirically confirmed via DOM probe: out of 9000+ CSS rules in the
+document, only `.cm-button` matches the legacy manager's button. The
+"fix" some users see after running Update All — when an actual node
+update happens and ComfyUI restarts — is upstream state coincidentally
+pulling in different assets; it's not stable across reloads when no
+update happens.
+
+**What this patch does:**
+`web/manager_dialog_styling_fix.js` registers a frontend extension
+that scans loaded stylesheets for any non-Vue-scoped `.p-button` rule
+defining `border-radius` or `padding`. If absent, it injects a small
+CSS shim restoring `.cm-button` / `.cm-small-button` /
+`.cm-experimental-button` to a sensible look (rounded corners,
+padding, min-height, font-size). If present (i.e., upstream eventually
+ships proper styles), it skips injection so future fixes
+auto-deactivate this patch.
+
 ## Verifying it works
 
 1. Restart ComfyUI. In the startup log, look for a line like:
@@ -83,6 +113,13 @@ never finishes anyway). Together they are why Update All looks broken.
    `--enable-manager-legacy-ui`) and click **Update All**. After the
    batch finishes you should see a modal listing every pack that was
    updated.
+4. The dialog buttons should have rounded corners and proper padding
+   regardless of whether an actual update happened. The console will
+   show either
+   `[manager-dialog-styling-fix] injected legacy manager dialog button shim.`
+   (patch active) or
+   `[manager-dialog-styling-fix] upstream .p-button styles detected; skipping injection.`
+   (no longer needed).
 
 ## When to remove a patch
 
@@ -127,7 +164,8 @@ ComfyUI-Mgr-Patches/
 ├── pyproject.toml           # Standard ComfyUI custom-node metadata.
 ├── README.md                # This file.
 └── web/
-    └── update_all_fix.js    # Frontend half of the Update All patch.
+    ├── update_all_fix.js              # Frontend half of the Update All patch.
+    └── manager_dialog_styling_fix.js  # Restores legacy dialog button styling.
 ```
 
 ## License
