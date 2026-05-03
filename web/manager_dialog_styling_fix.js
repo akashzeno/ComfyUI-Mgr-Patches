@@ -168,6 +168,13 @@ function injectStyles() {
             width: 14px;
             height: 14px;
         }
+        /* The close button has an empty <span class="p-button-label">
+           sibling next to the SVG. With display:flex + justify-content:center
+           the span (even empty) takes width and pushes the icon off-center.
+           Hide it visually but keep aria-label on the button for a11y. */
+        button.p-dialog-close-button > .p-button-label {
+            display: none;
+        }
     `;
     document.head.appendChild(style);
 }
