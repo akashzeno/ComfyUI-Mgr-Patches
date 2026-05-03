@@ -98,7 +98,13 @@ function injectStyles() {
     // Selector `button.cm-button` is intentionally low-specificity so that
     // upstream `.p-button` rules win when they show up.
     style.textContent = `
-        button.cm-button {
+        /* Regular dialog buttons (Update All, Custom Nodes Manager, etc.)
+           plus colored variants (cm-button-red Restart, cm-button-orange).
+           cm-experimental-button extends cm-button so it's covered by
+           the first selector. */
+        button.cm-button,
+        button.cm-button-red,
+        button.cm-button-orange {
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -114,6 +120,7 @@ function injectStyles() {
             outline-color: transparent;
             transition: background 0.2s, color 0.2s, border-color 0.2s, outline-color 0.2s, box-shadow 0.2s;
         }
+        /* Small variants used by some manager sub-dialogs. */
         button.cm-small-button {
             display: inline-flex;
             align-items: center;
@@ -129,6 +136,37 @@ function injectStyles() {
             gap: 0.5rem;
             outline-color: transparent;
             transition: background 0.2s, color 0.2s, border-color 0.2s, outline-color 0.2s, box-shadow 0.2s;
+        }
+        /* Dialog close (X) button: hand-built by ComfyDialog with PrimeVue-
+           looking classes but no real Vue component, so PrimeVue's Pass-Through
+           never tags it with data-pc-section and it goes unstyled when
+           PrimeVue's lazy registration hasn't fired. Style it as a small
+           rounded icon-only button.
+           Selector includes :where() to keep specificity at 0,1,0 so any
+           future real Vue-mounted close button overrides cleanly. */
+        button.p-dialog-close-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            user-select: none;
+            width: 2rem;
+            height: 2rem;
+            padding: 0;
+            border: 1px solid transparent;
+            border-radius: 50%;
+            background: transparent;
+            color: inherit;
+            font-family: inherit;
+            outline-color: transparent;
+            transition: background 0.2s, color 0.2s, border-color 0.2s, outline-color 0.2s, box-shadow 0.2s;
+        }
+        button.p-dialog-close-button:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+        button.p-dialog-close-button > svg {
+            width: 14px;
+            height: 14px;
         }
     `;
     document.head.appendChild(style);
