@@ -12,6 +12,15 @@ Currently shipped patches:
   "Update All" path. Python half is `_apply_update_all_fix` in
   `prestartup_script.py`; frontend half is `web/update_all_fix.js`.
 
+- **Manager dialog button styling fix** (frontend-only, for ComfyUI
+  frontend 1.42.15+ / PrimeVue v4 unstyled mode) — restores the
+  legacy manager dialog's button layout (rounded corners, padding,
+  font-size) when PrimeVue v4 hasn't lazily registered its Button
+  styles yet. Lives in `web/manager_dialog_styling_fix.js`;
+  self-deactivates if a bare `.p-button` rule with `padding` or
+  `border-radius` already exists in any stylesheet (including
+  `@layer` blocks).
+
 This node registers no graph nodes; it exists purely for its prestartup
 script and its WEB_DIRECTORY frontend extensions. See README.md for the
 full story per patch.

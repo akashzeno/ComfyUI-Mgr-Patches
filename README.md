@@ -69,6 +69,43 @@ never finishes anyway). Together they are why Update All looks broken.
   coexists with a future upstream fix or any in-place patch without
   double-rendering.
 
+### Manager dialog button styling (`comfyui-frontend-package==1.42.15`+ / PrimeVue v4 unstyled mode)
+
+The legacy manager dialog constructs buttons as
+`<button class="p-button p-component cm-button">`, expecting
+PrimeVue's `.p-button` rules to provide layout (border-radius,
+padding, font-size, transitions). On ComfyUI frontend 1.42.15+,
+PrimeVue v4 ships in **unstyled-by-default** mode — component CSS is
+registered lazily, only when a real PrimeVue Vue component (e.g.
+`<Button>`) actually mounts somewhere in the app. If no such mount
+has happened by the time the manager dialog opens, the document
+contains no bare `.p-button` rule and the manager's hand-built
+buttons fall back to user-agent defaults: 21px height, 1px×6px
+padding, 2px outset border, no rounded corners. The bug is
+**intermittent and not caused by any specific custom node** — it's
+a load-order race inside ComfyUI's own frontend.
+
+Empirically captured "working" computed values from a live probe
+when PrimeVue had registered: `padding: 8px 12px`, `border-radius:
+6px`, `font-size: 1rem`, `border: 1px solid`, plus a 5-property
+transition.
+
+**What this patch does:**
+`web/manager_dialog_styling_fix.js` registers a frontend extension
+that walks every loaded stylesheet (recursing into `@layer` blocks
+where PrimeVue v4 nests its rules) looking for a bare `.p-button`
+rule that defines `padding` or `border-radius`. If found, it skips
+injection — PrimeVue is already styling the buttons. If absent, it
+injects a CSS shim hard-coding the captured layout values onto
+`button.cm-button` and `button.cm-small-button`. Colors are
+intentionally left to the manager's existing `.cm-button` rule
+(which uses theme variables), so the shim only adds layout — no
+color overrides.
+
+The selectors are deliberately low-specificity (`button.cm-button`,
+not `.p-button.cm-button`) so any future upstream fix or PrimeVue
+mount overrides this shim cleanly.
+
 ## Verifying it works
 
 1. Restart ComfyUI. In the startup log, look for a line like:
@@ -83,6 +120,14 @@ never finishes anyway). Together they are why Update All looks broken.
    `--enable-manager-legacy-ui`) and click **Update All**. After the
    batch finishes you should see a modal listing every pack that was
    updated.
+4. The dialog buttons should always have rounded corners and proper
+   padding regardless of whether PrimeVue happened to mount its
+   button styles for this page load. The browser console will show
+   either
+   `[manager-dialog-styling-fix] injected legacy manager dialog button shim.`
+   (PrimeVue not registered yet, shim active) or
+   `[manager-dialog-styling-fix] upstream .p-button styles detected; skipping injection.`
+   (PrimeVue handled it, shim stays out of the way).
 
 ## When to remove a patch
 
@@ -127,7 +172,8 @@ ComfyUI-Mgr-Patches/
 ├── pyproject.toml           # Standard ComfyUI custom-node metadata.
 ├── README.md                # This file.
 └── web/
-    └── update_all_fix.js    # Frontend half of the Update All patch.
+    ├── update_all_fix.js              # Frontend half of the Update All patch.
+    └── manager_dialog_styling_fix.js  # Restores legacy dialog button layout.
 ```
 
 ## License
