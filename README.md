@@ -106,6 +106,32 @@ The selectors are deliberately low-specificity (`button.cm-button`,
 not `.p-button.cm-button`) so any future upstream fix or PrimeVue
 mount overrides this shim cleanly.
 
+### Manager window frame (`comfyui-frontend-package==1.57.1`+)
+
+Every legacy manager window (main menu, Custom Nodes Manager, Model
+Manager, Snapshot Manager) is built by `comfyui-gui-builder.js` as
+hand-made PrimeVue Dialog markup:
+`p-dialog-mask > p-dialog.global-dialog > p-dialog-header / p-dialog-content`.
+The panel itself (background, border, rounded corners, padding, header
+row) comes from the frontend's CSS. Frontend 1.55.18 shipped PrimeVue's
+Dialog rules plus `.global-dialog` padding rules; 1.57.1 (ComfyUI commit
+`40dcb30a9`) dropped the PrimeVue Dialog component and every `.p-dialog`
+/ `.global-dialog` rule with it. The windows then render as bare buttons
+over the canvas, with the close X under the title.
+
+**What this patch does:**
+`web/manager_dialog_frame_fix.js` injects PrimeVue's own Dialog rules
+(copied from 1.55.18), scoped to `.global-dialog`, with the `dialog.*`
+tokens resolved to the `--p-overlay-modal-*` / `--p-mask-*` variables
+they pointed at. The frontend still defines those, so the panel follows
+the theme. Guard: if a `.p-dialog` or `.global-dialog` rule that sets a
+background is already present, it skips injection.
+
+> **Folder name note (again):** this patch was first written as its own
+> `ComfyUI-ManagerDialogFix` folder and got `Blocked by policy` at
+> startup, because the name contains `comfyui-manager`. Add manager
+> patches here instead.
+
 ## Verifying it works
 
 1. Restart ComfyUI. In the startup log, look for a line like:
@@ -173,7 +199,8 @@ ComfyUI-Mgr-Patches/
 ├── README.md                # This file.
 └── web/
     ├── update_all_fix.js              # Frontend half of the Update All patch.
-    └── manager_dialog_styling_fix.js  # Restores legacy dialog button layout.
+    ├── manager_dialog_styling_fix.js  # Restores legacy dialog button layout.
+    └── manager_dialog_frame_fix.js    # Restores the legacy window panel (frontend 1.57.1+).
 ```
 
 ## License
